@@ -1,0 +1,16 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{A6B4DCCB-4DE4-BA86-F438-68BFD6CDFA96}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "FDEMO",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	]
+}
