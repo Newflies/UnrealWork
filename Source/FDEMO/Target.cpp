@@ -32,7 +32,7 @@ ATarget::ATarget()
 		StaticMesh->SetRelativeLocation(FVector(0, 0, 0));
 		StaticMesh->SetRelativeScale3D(FVector(0.5, 0.5, 0.5));
 		StaticMesh->SetRelativeRotation(FQuat::MakeFromEuler(FVector(90, 0, 90)));
-		StaticMesh->OnComponentBeginOverlap.AddDynamic(this,&ATarget::OnHit);
+		//StaticMesh->OnComponentBeginOverlap.AddDynamic(this,&ATarget::OnHit);
 	}
 }
 
@@ -67,14 +67,14 @@ void ATarget::OnHit(class UPrimitiveComponent* HitComp, class AActor* OtherActor
 void ATarget::ReportAndDestory(float _time)
 {
 	if (_time > 0) return;
-	GEngine->AddOnScreenDebugMessage
-	(
-		-1,
-		10, 			//	显示的时间/秒
-		FColor::Blue, 	//	显示的颜色
-		"Score:" + FString::SanitizeFloat(localScore)	//	显示的信息
-	);
-	Destroy();
+	//GEngine->AddOnScreenDebugMessage
+	//(
+	//	-1,
+	//	10, 			//	显示的时间/秒
+	//	FColor::Blue, 	//	显示的颜色
+	//	"Score:" + FString::SanitizeFloat(localScore)	//	显示的信息
+	//);
+	//Destroy();
 }
 void ATarget::MoveArond(float DeltaTime)
 {
