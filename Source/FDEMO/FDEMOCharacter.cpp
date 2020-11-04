@@ -50,7 +50,7 @@ AFDEMOCharacter::AFDEMOCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 	//初始化玩家生命值
-	MaxHealth = 100.0f;
+	MaxHealth = 20.0f;
 	CurrentHealth = MaxHealth;
 	//初始化投射物类
 	ProjectileClass = AThirdPersonMPProjectile::StaticClass();
@@ -59,6 +59,7 @@ AFDEMOCharacter::AFDEMOCharacter()
 	bIsFiringWeapon = false;
 	//玩家分数
 	PlayerScore = 0;
+	//
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -71,6 +72,7 @@ void AFDEMOCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFDEMOCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFDEMOCharacter::MoveRight);
 
@@ -89,7 +91,7 @@ void AFDEMOCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AFDEMOCharacter::OnResetVR);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFDEMOCharacter::StartFire);
-
+	PlayerInputComponent->BindAction("ReLoad",IE_Pressed,this,&AFDEMOCharacter::ReLoadBullet);
 }
 
 
@@ -204,7 +206,7 @@ void AFDEMOCharacter::SetCurrentHealth(float healthValue)
 
 void AFDEMOCharacter::StartFire()
 {
-	if (!bIsFiringWeapon)
+	if (!bIsFiringWeapon&&GetCurrentHealth()>0)
 	{
 		bIsFiringWeapon = true;
 		UWorld* World = GetWorld();
@@ -229,6 +231,7 @@ void AFDEMOCharacter::HandleFire_Implementation()
 	spawnParameters.Owner = this;
 
 	AThirdPersonMPProjectile* spawnedProjectile = GetWorld()->SpawnActor<AThirdPersonMPProjectile>(spawnLocation, spawnRotation, spawnParameters);
+	Minus_1_health();
 }
 void AFDEMOCharacter::AddScore(int32 _num)
 {
@@ -241,3 +244,12 @@ void AFDEMOCharacter::AddScore(int32 _num)
 		"Score:" + FString::SanitizeFloat(PlayerScore)	//	显示的信息
 	);
 }
+void AFDEMOCharacter::Minus_1_health()
+{
+	CurrentHealth -= 1;
+}
+void AFDEMOCharacter::ReLoadBullet()
+{
+	CurrentHealth=MaxHealth;
+}
+

@@ -30,7 +30,6 @@ public:
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
-
 	
 protected:
 
@@ -134,5 +133,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 		void AddScore(int32 _num);
+	UFUNCTION(BlueprintCallable, Category = "Health")
+		void Minus_1_health();
+	UFUNCTION(BlueprintCallable, Category = "Health")
+		void ReLoadBullet();
 };
 
