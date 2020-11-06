@@ -85,8 +85,8 @@ void AFDEMOCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AFDEMOCharacter::LookUpAtRate);
 
 	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &AFDEMOCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AFDEMOCharacter::TouchStopped);
+	// PlayerInputComponent->BindTouch(IE_Pressed, this, &AFDEMOCharacter::TouchStarted);
+	// PlayerInputComponent->BindTouch(IE_Released, this, &AFDEMOCharacter::TouchStopped);
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AFDEMOCharacter::OnResetVR);
