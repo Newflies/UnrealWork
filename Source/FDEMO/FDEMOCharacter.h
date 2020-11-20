@@ -89,7 +89,8 @@ protected:
 		float FireRate;
 
 	/** 若为true，则正在发射投射物。*/
-	bool bIsFiringWeapon;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Action")
+	bool FireButtonDown;
 
 	/** 用于启动武器射击的函数。*/
 	UFUNCTION(BlueprintCallable, Category = "Gameplay")
@@ -105,6 +106,7 @@ protected:
 
 	/** 定时器句柄，用于提供生成间隔时间内的射速延迟。*/
 	FTimerHandle FiringTimer;
+		
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -125,7 +127,8 @@ public:
 	/** 当前生命值的存值函数。将此值的范围限定在0到MaxHealth之间，并调用OnHealthUpdate。仅在服务器上调用。*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
 		void SetCurrentHealth(float healthValue);
-
+	UFUNCTION(BlueprintPure,Category="Action")
+        FORCEINLINE bool GetJumpButtonDown()  const  {return JumpButtonDown;}
 	/** 承受伤害的事件。从APawn覆盖。*/
 	//UFUNCTION(BlueprintCallable, Category = "Health")
 	//	float TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
@@ -137,5 +140,26 @@ public:
 		void Minus_1_health();
 	UFUNCTION(BlueprintCallable, Category = "Health")
 		void ReLoadBullet();
+	UFUNCTION(BlueprintCallable, Category = "Action")
+		void CharacterJump();
+	UFUNCTION(BlueprintCallable,Category="Action")
+		void CharacterStopJumping();
+	UFUNCTION(BlueprintCallable,Category="Action")
+		void CharacterCrouching();
+	UFUNCTION(BlueprintCallable,Category="Action")
+		void CharacterStopCrouching();
+	UFUNCTION(BlueprintCallable,Category="Action")
+		void CharacterPunching();
+	UFUNCTION(BlueprintCallable,Category="Action")
+		void CharacterStopPunching();
+	
+	/**若为true，则正在跳跃。*/
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Action")
+	bool JumpButtonDown;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Action")
+    bool CrouchButtonDown;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Action")
+	bool PunchButtonDown;
 };
 

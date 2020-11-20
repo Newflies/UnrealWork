@@ -56,7 +56,7 @@ AFDEMOCharacter::AFDEMOCharacter()
 	ProjectileClass = AThirdPersonMPProjectile::StaticClass();
 	//初始化射速
 	FireRate = 0.25f;
-	bIsFiringWeapon = false;
+	FireButtonDown = false;
 	//玩家分数
 	PlayerScore = 0;
 	//
@@ -69,8 +69,10 @@ void AFDEMOCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFDEMOCharacter::CharacterJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFDEMOCharacter::CharacterStopJumping);
+	PlayerInputComponent->BindAction("Crouch",IE_Pressed,this,&AFDEMOCharacter::CharacterCrouching);
+	PlayerInputComponent->BindAction("Crouch",IE_Released,this,&AFDEMOCharacter::CharacterStopCrouching);
 
 	
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFDEMOCharacter::MoveForward);
@@ -91,7 +93,10 @@ void AFDEMOCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AFDEMOCharacter::OnResetVR);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFDEMOCharacter::StartFire);
+	PlayerInputComponent->BindAction("Fire",IE_Released,this,&AFDEMOCharacter::StopFire);
 	PlayerInputComponent->BindAction("ReLoad",IE_Pressed,this,&AFDEMOCharacter::ReLoadBullet);
+	PlayerInputComponent->BindAction("Punch",IE_Pressed,this,&AFDEMOCharacter::CharacterPunching);
+	PlayerInputComponent->BindAction("Punch",IE_Released,this,&AFDEMOCharacter::CharacterStopPunching);
 }
 
 
@@ -206,9 +211,9 @@ void AFDEMOCharacter::SetCurrentHealth(float healthValue)
 
 void AFDEMOCharacter::StartFire()
 {
-	if (!bIsFiringWeapon&&GetCurrentHealth()>0)
+	if (!FireButtonDown&&GetCurrentHealth()>0)
 	{
-		bIsFiringWeapon = true;
+		FireButtonDown = true;
 		UWorld* World = GetWorld();
 		World->GetTimerManager().SetTimer(FiringTimer, this, &AFDEMOCharacter::StopFire, FireRate, false);
 		HandleFire();
@@ -218,7 +223,7 @@ void AFDEMOCharacter::StartFire()
 
 void AFDEMOCharacter::StopFire()
 {
-	bIsFiringWeapon = false;
+	FireButtonDown = false;
 }
 
 void AFDEMOCharacter::HandleFire_Implementation()
@@ -252,4 +257,39 @@ void AFDEMOCharacter::ReLoadBullet()
 {
 	CurrentHealth=MaxHealth;
 }
+void AFDEMOCharacter::CharacterJump()
+{
+	bPressedJump = true;
+	JumpKeyHoldTime = 0.0f;
+	JumpButtonDown=true;
+}
+void  AFDEMOCharacter::CharacterStopJumping ()
+{
+	bPressedJump = false;
+	JumpButtonDown=false;
+	ResetJumpState();
+}
+void AFDEMOCharacter::CharacterCrouching()
+{
+	CrouchButtonDown=true;
+}
+void AFDEMOCharacter::CharacterStopCrouching()
+{
+	CrouchButtonDown=false;
+}
+void AFDEMOCharacter::CharacterPunching()
+{
+	PunchButtonDown=true;
+}
+void AFDEMOCharacter::CharacterStopPunching()
+{
+	PunchButtonDown=false;
+}
+
+
+
+
+
+
+
 
