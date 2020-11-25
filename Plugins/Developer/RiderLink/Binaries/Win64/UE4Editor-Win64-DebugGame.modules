@@ -1,0 +1,10 @@
+{
+	"BuildId": "13144385",
+	"Modules": 
+	{
+		"RiderBlueprintExtension": "UE4Editor-RiderBlueprintExtension-Win64-DebugGame.dll",
+		"RiderGameControlExtension": "UE4Editor-RiderGameControlExtension-Win64-DebugGame.dll",
+		"RiderLink": "UE4Editor-RiderLink-Win64-DebugGame.dll",
+		"RiderLoggingExtension": "UE4Editor-RiderLoggingExtension-Win64-DebugGame.dll"
+	}
+}

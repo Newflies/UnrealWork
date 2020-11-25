@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "SWeapon.h"
 #include "GameFramework/Character.h"
 #include "FDEMOCharacter.generated.h"
 
@@ -18,6 +20,9 @@ class AFDEMOCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+	
+
+	
 public:
 	AFDEMOCharacter();
 	/**  Ù–‘∏¥÷∆ */
@@ -30,6 +35,15 @@ public:
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=Weapon)
+	ASWeapon* CurrentWeapon;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Player")
+	TSubclassOf<ASWeapon> StarterWeaponClass;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Player")
+	FName WeaponAttachSocketName;
 	
 protected:
 
@@ -161,5 +175,8 @@ public:
     bool CrouchButtonDown;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Action")
 	bool PunchButtonDown;
+
+	void GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const override;
+	
 };
 

@@ -42,7 +42,7 @@ AThirdPersonMPProjectile::AThirdPersonMPProjectile()
 	if (DefaultMesh.Succeeded())
 	{
 		StaticMesh->SetStaticMesh(DefaultMesh.Object);
-		StaticMesh->SetRelativeLocation (FVector(0.0f, 0.0f, -37.5f));
+		StaticMesh->SetRelativeLocation (FVector(0.0f, 0.0f, 0.0f));
 		StaticMesh->SetRelativeScale3D (FVector(2, 2, 2));
 		StaticMesh->SetRelativeRotation(FQuat::MakeFromEuler(FVector(0,0,-90)));
 	}

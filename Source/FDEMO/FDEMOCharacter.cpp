@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "FDEMOCharacter.h"
+
+#include "DrawDebugHelpers.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -60,6 +62,9 @@ AFDEMOCharacter::AFDEMOCharacter()
 	//玩家分数
 	PlayerScore = 0;
 	//
+
+	//
+	WeaponAttachSocketName="WeaponSocket";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -170,24 +175,24 @@ void AFDEMOCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& Out
 void AFDEMOCharacter::OnHealthUpdate()
 {
 	//客户端特定的功能
-	if (IsLocallyControlled())
-	{
-		FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
-
-		if (CurrentHealth <= 0)
-		{
-			FString deathMessage = FString::Printf(TEXT("You have been killed."));
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
-		}
-	}
+	// if (IsLocallyControlled())
+	// {
+	// 	FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
+	// 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+	//
+	// 	if (CurrentHealth <= 0)
+	// 	{
+	// 		FString deathMessage = FString::Printf(TEXT("You have been killed."));
+	// 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
+	// 	}
+	// }
 
 	//服务器特定的功能
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
-	}
+	// if (GetLocalRole() == ROLE_Authority)
+	// {
+	// 	FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
+	// 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+	// }
 
 	//在所有机器上都执行的函数。 
 	/*
@@ -215,12 +220,15 @@ void AFDEMOCharacter::StartFire()
 	{
 		FireButtonDown = true;
 		UWorld* World = GetWorld();
-		World->GetTimerManager().SetTimer(FiringTimer, this, &AFDEMOCharacter::StopFire, FireRate, false);
-		HandleFire();
+		World->GetTimerManager().SetTimer(FiringTimer, this, &AFDEMOCharacter::StopFire, FireRate, false);	
+		if(CurrentWeapon)
+		{
+			CurrentWeapon->HandFire();
 
+
+		}
 	}
 }
-
 void AFDEMOCharacter::StopFire()
 {
 	FireButtonDown = false;
@@ -228,63 +236,74 @@ void AFDEMOCharacter::StopFire()
 
 void AFDEMOCharacter::HandleFire_Implementation()
 {
-	FVector spawnLocation = GetActorLocation() + (GetControlRotation().Vector() * 100.0f) + (GetActorUpVector() * 50.0f);
+	FVector spawnLocation = GetActorLocation() + (GetControlRotation().Vector() * 100.0f) + (GetActorUpVector() * 50.0f)+FVector(0,40,0);
 	FRotator spawnRotation = GetControlRotation();
 
 	FActorSpawnParameters spawnParameters;
 	spawnParameters.Instigator = GetInstigator();
 	spawnParameters.Owner = this;
+		AThirdPersonMPProjectile* spawnedProjectile = GetWorld()->SpawnActor<AThirdPersonMPProjectile>(spawnLocation, spawnRotation, spawnParameters);
 
-	AThirdPersonMPProjectile* spawnedProjectile = GetWorld()->SpawnActor<AThirdPersonMPProjectile>(spawnLocation, spawnRotation, spawnParameters);
-	Minus_1_health();
 }
-void AFDEMOCharacter::AddScore(int32 _num)
+	void AFDEMOCharacter::AddScore(int32 _num)
+	{
+		PlayerScore += _num;
+		// GEngine->AddOnScreenDebugMessage
+		// (
+		// 	-1,
+		// 	10, 			//	显示的时间/秒
+		// 	FColor::Blue, 	//	显示的颜色
+		// 	"Score:" + FString::SanitizeFloat(PlayerScore)	//	显示的信息
+		// );
+	}
+	void AFDEMOCharacter::Minus_1_health()
+	{
+		CurrentHealth -= 1;
+	}
+	void AFDEMOCharacter::ReLoadBullet()
+	{
+		CurrentHealth=MaxHealth;
+	}
+	void AFDEMOCharacter::CharacterJump()
+	{
+		bPressedJump = true;
+		JumpKeyHoldTime = 0.0f;
+		JumpButtonDown=true;
+	}
+	void  AFDEMOCharacter::CharacterStopJumping ()
+	{
+		bPressedJump = false;
+		JumpButtonDown=false;
+		ResetJumpState();
+	}
+	void AFDEMOCharacter::CharacterCrouching()
+	{
+		CrouchButtonDown=true;
+	}
+	void AFDEMOCharacter::CharacterStopCrouching()
+	{
+		CrouchButtonDown=false;
+	}
+	void AFDEMOCharacter::CharacterPunching()
+	{
+		PunchButtonDown=true;
+	}
+	void AFDEMOCharacter::CharacterStopPunching()
+	{
+		PunchButtonDown=false;
+	}
+
+void AFDEMOCharacter::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const
 {
-	PlayerScore += _num;
-	GEngine->AddOnScreenDebugMessage
-	(
-		-1,
-		10, 			//	显示的时间/秒
-		FColor::Blue, 	//	显示的颜色
-		"Score:" + FString::SanitizeFloat(PlayerScore)	//	显示的信息
-	);
+	if(FollowCamera)
+	{
+		OutLocation=FollowCamera->GetComponentLocation();
+		OutRotation=FollowCamera->GetComponentRotation();
+		return;
+	}
+	Super::GetActorEyesViewPoint(OutLocation, OutRotation);
 }
-void AFDEMOCharacter::Minus_1_health()
-{
-	CurrentHealth -= 1;
-}
-void AFDEMOCharacter::ReLoadBullet()
-{
-	CurrentHealth=MaxHealth;
-}
-void AFDEMOCharacter::CharacterJump()
-{
-	bPressedJump = true;
-	JumpKeyHoldTime = 0.0f;
-	JumpButtonDown=true;
-}
-void  AFDEMOCharacter::CharacterStopJumping ()
-{
-	bPressedJump = false;
-	JumpButtonDown=false;
-	ResetJumpState();
-}
-void AFDEMOCharacter::CharacterCrouching()
-{
-	CrouchButtonDown=true;
-}
-void AFDEMOCharacter::CharacterStopCrouching()
-{
-	CrouchButtonDown=false;
-}
-void AFDEMOCharacter::CharacterPunching()
-{
-	PunchButtonDown=true;
-}
-void AFDEMOCharacter::CharacterStopPunching()
-{
-	PunchButtonDown=false;
-}
+
 
 
 
