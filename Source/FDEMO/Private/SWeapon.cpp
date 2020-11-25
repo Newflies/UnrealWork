@@ -42,15 +42,23 @@ void ASWeapon::HandFire()
 		QueryParams.AddIgnoredActor(MyOwner);
 		QueryParams.bTraceComplex=true;
 		FHitResult HitResult;
-		if(GetWorld()->LineTraceSingleByChannel(HitResult,EyeLocation,TraceEnd,ECC_Visibility,QueryParams))
-		{
-			GEngine->AddOnScreenDebugMessage
+		GEngine->AddOnScreenDebugMessage
 (
 -1,
 10, 			//	显示的时间/秒
 FColor::Blue, 	//	显示的颜色
-HitResult.Actor->GetName()	//	显示的信息
+"1"+EyeLocation.ToString()	//	显示的信息
+);
+		GEngine->AddOnScreenDebugMessage
+(
+-1,
+10, 			//	显示的时间/秒
+FColor::Blue, 	//	显示的颜色
+EyeRotation.ToString()	//	显示的信息
 );		
+		if(GetWorld()->LineTraceSingleByChannel(HitResult,EyeLocation,TraceEnd,ECC_Visibility,QueryParams))
+		{
+
 		}
 		DrawDebugLine(GetWorld(),EyeLocation,TraceEnd,FColor::Red,false,1.0f,1.0f);
 	}
