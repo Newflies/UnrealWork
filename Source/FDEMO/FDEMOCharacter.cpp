@@ -65,6 +65,8 @@ AFDEMOCharacter::AFDEMOCharacter()
 
 	//
 	WeaponAttachSocketName="WeaponSocket";
+	DefaultFOV=100;
+	ZoomedFov=50;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -318,7 +320,14 @@ void AFDEMOCharacter::EndZoom()
 	bWantsToZoom = false;
 }
 
-void AFDEMOCharacter::
+void AFDEMOCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	float TargetFOV = bWantsToZoom ? ZoomedFov : DefaultFOV;
+	float CurrentFOV = FMath::FInterpTo(FollowCamera->FieldOfView, TargetFOV, DeltaSeconds, ZoomInterSpeed);
+	FollowCamera->SetFieldOfView(CurrentFOV);
+}
+
 
 
 

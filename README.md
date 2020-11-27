@@ -21,6 +21,6 @@
 
 第五次作业
 添加功能：pickup，射线开枪音效反馈，榴弹枪开枪的击飞，遇到玩家立即爆炸，各种物理材质的设置，枪口火焰（缺少粒子特效），镜头拉近
-链接：https://pan.baidu.com/s/15dvXHFuX4Vop3q3F43de3Q 
-提取码：swzh 
+链接：https://pan.baidu.com/s/1cmP21pK5p1_qQjEQObzEzA 
+提取码：2rrq 
 复制这段内容后打开百度网盘手机App，操作更方便哦
