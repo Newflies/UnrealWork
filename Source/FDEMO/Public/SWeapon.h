@@ -24,7 +24,13 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-		
+	UFUNCTION(BlueprintNativeEvent,Category="aaa")
 	void HandFire() ;
 
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Sound")
+	USoundBase* ShellSound;
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Sound")
+	USoundBase* HeadSound;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Projectile")
+	TSubclassOf<AActor>ProjectileClass;
 };

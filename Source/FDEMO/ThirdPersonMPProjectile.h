@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PhysicsEngine/RadialForceComponent.h"
 #include "GameFramework/Actor.h"
 #include "ThirdPersonMPProjectile.generated.h"
 
+
+	class URadialForceComponent;
 UCLASS()
 class FDEMO_API AThirdPersonMPProjectile : public AActor
 {
@@ -46,6 +49,8 @@ public:
 	//此投射物造成的伤害。
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Damage")
 		float Damage;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	URadialForceComponent* ExplosionForce = nullptr;
 protected:
 	virtual void Destroyed() override;
 

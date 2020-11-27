@@ -227,6 +227,7 @@ void AFDEMOCharacter::StartFire()
 
 
 		}
+		// HandleFire();
 	}
 }
 void AFDEMOCharacter::StopFire()
@@ -242,7 +243,9 @@ void AFDEMOCharacter::HandleFire_Implementation()
 	FActorSpawnParameters spawnParameters;
 	spawnParameters.Instigator = GetInstigator();
 	spawnParameters.Owner = this;
-		AThirdPersonMPProjectile* spawnedProjectile = GetWorld()->SpawnActor<AThirdPersonMPProjectile>(spawnLocation, spawnRotation, spawnParameters);
+		// AThirdPersonMPProjectile* spawnedProjectile = GetWorld()->SpawnActor<AThirdPersonMPProjectile>(spawnLocation, spawnRotation, spawnParameters);
+	// UClass* MyProjectile=	LoadClass<AThirdPersonMPProjectile>(nullptr,TEXT("BluePrint'/Game/BluePrints/MyThirdPersonMPProjectile.MyThirdPersonMPProjectile_C'"));
+	// GetWorld()->SpawnActor(MyProjectile);
 
 }
 	void AFDEMOCharacter::AddScore(int32 _num)

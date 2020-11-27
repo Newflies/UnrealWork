@@ -31,7 +31,7 @@ AThirdPersonMPProjectile::AThirdPersonMPProjectile()
 	//在击中事件上注册此投射物撞击函数。
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		SphereComponent->OnComponentHit.AddDynamic(this, &AThirdPersonMPProjectile::OnProjectileImpact);
+		// SphereComponent->OnComponentHit.AddDynamic(this, &AThirdPersonMPProjectile::OnProjectileImpact);
 	}
 	//定义将作为视觉呈现的网格体。
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> DefaultMesh(TEXT("/Game/FPS_Weapon_Bundle/Weapons/Meshes/Ammunition/SM_Shell_40mm_G.SM_Shell_40mm_G"));
@@ -62,6 +62,10 @@ AThirdPersonMPProjectile::AThirdPersonMPProjectile()
 
 	DamageType = UDamageType::StaticClass();
 	Damage = 10.0f;
+
+	ExplosionForce= CreateDefaultSubobject<URadialForceComponent>(FName("ExplosionForce"));
+	ExplosionForce->SetupAttachment(RootComponent);
+	ExplosionForce->SetAutoActivate(false);
 }
 
 // Called when the game starts or when spawned
@@ -82,15 +86,16 @@ void AThirdPersonMPProjectile::Destroyed()
 {
 	FVector spawnLocation = GetActorLocation();
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionEffect, spawnLocation, FRotator::ZeroRotator, true, EPSCPoolMethod::AutoRelease);
+
 }
 
 void AThirdPersonMPProjectile::OnProjectileImpact(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (OtherActor)
 	{
-		UGameplayStatics::ApplyPointDamage(OtherActor, Damage, NormalImpulse, Hit, GetInstigator()->Controller, this, DamageType);
+		// UGameplayStatics::ApplyPointDamage(OtherActor, Damage, NormalImpulse, Hit, GetInstigator()->Controller, this, DamageType);
 	}
-
+	ExplosionForce->FireImpulse();//撞击后便释放力
 	Destroy();
 }
 
