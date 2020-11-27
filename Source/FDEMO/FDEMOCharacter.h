@@ -177,6 +177,18 @@ public:
 	bool PunchButtonDown;
 
 	void GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const override;
-	
-};
+
+	bool bWantsToZoom;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Player")
+	float ZoomedFov;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = player,meta=(ClampMin=0.0,ClampMax=100))
+	float ZoomInterSpeed;
+
+	float DefaultFOV;
+	void BeginZoom();
+	void EndZoom();};
+
+virtual void Tick(float DeltaTime) override;
 

@@ -102,6 +102,8 @@ void AFDEMOCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("ReLoad",IE_Pressed,this,&AFDEMOCharacter::ReLoadBullet);
 	PlayerInputComponent->BindAction("Punch",IE_Pressed,this,&AFDEMOCharacter::CharacterPunching);
 	PlayerInputComponent->BindAction("Punch",IE_Released,this,&AFDEMOCharacter::CharacterStopPunching);
+	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &AFDEMOCharacter::BeginZoom);
+	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &AFDEMOCharacter::EndZoom);
 }
 
 
@@ -306,8 +308,17 @@ void AFDEMOCharacter::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutR
 	}
 	Super::GetActorEyesViewPoint(OutLocation, OutRotation);
 }
+void AFDEMOCharacter::BeginZoom()
+{
+	bWantsToZoom = true;
+}
 
+void AFDEMOCharacter::EndZoom()
+{
+	bWantsToZoom = false;
+}
 
+void AFDEMOCharacter::
 
 
 
