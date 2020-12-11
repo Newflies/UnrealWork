@@ -2,8 +2,13 @@
 
 #include "FDEMOCharacter.h"
 
+#include <tuple>
+
+
 #include "DrawDebugHelpers.h"
+#include "FDEMOGameMode.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
+#include "MyPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -13,6 +18,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
 #include "ThirdPersonMPProjectile.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,15 +56,19 @@ AFDEMOCharacter::AFDEMOCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	WeaponMesh=CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaopnMesh"));
+	WeaponMesh->SetupAttachment(GetMesh(),WeaponAttachSocketName);
+	
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 	//初始化玩家生命值
-	MaxHealth = 20.0f;
+	MaxHealth = 10.0f;
 	CurrentHealth = MaxHealth;
 	//初始化投射物类
 	ProjectileClass = AThirdPersonMPProjectile::StaticClass();
 	//初始化射速
-	FireRate = 0.25f;
+	FireRate = 2.0f;
 	FireButtonDown = false;
 	//玩家分数
 	PlayerScore = 0;
@@ -67,6 +78,7 @@ AFDEMOCharacter::AFDEMOCharacter()
 	WeaponAttachSocketName="WeaponSocket";
 	DefaultFOV=100;
 	ZoomedFov=50;
+	bReplicates=true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -100,7 +112,7 @@ void AFDEMOCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AFDEMOCharacter::OnResetVR);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFDEMOCharacter::StartFire);
-	PlayerInputComponent->BindAction("Fire",IE_Released,this,&AFDEMOCharacter::StopFire);
+	// PlayerInputComponent->BindAction("Fire",IE_Released,this,&AFDEMOCharacter::StopFire);
 	PlayerInputComponent->BindAction("ReLoad",IE_Pressed,this,&AFDEMOCharacter::ReLoadBullet);
 	PlayerInputComponent->BindAction("Punch",IE_Pressed,this,&AFDEMOCharacter::CharacterPunching);
 	PlayerInputComponent->BindAction("Punch",IE_Released,this,&AFDEMOCharacter::CharacterStopPunching);
@@ -165,6 +177,14 @@ void AFDEMOCharacter::MoveRight(float Value)
 	}
 }
 
+void AFDEMOCharacter::OnDeath()
+{
+
+}
+
+
+
+
 //////////////////////////////////////////////////////////////////////////
 // 复制的属性
 
@@ -179,29 +199,36 @@ void AFDEMOCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& Out
 void AFDEMOCharacter::OnHealthUpdate()
 {
 	//客户端特定的功能
-	// if (IsLocallyControlled())
-	// {
-	// 	FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
-	// 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
-	//
-	// 	if (CurrentHealth <= 0)
-	// 	{
-	// 		FString deathMessage = FString::Printf(TEXT("You have been killed."));
-	// 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
-	// 	}
-	// }
+	 if (IsLocallyControlled())
+	 {
+	 	FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
+	 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+	
+	 	if (CurrentHealth <= 0)
+	 	{
+	 		FString deathMessage = FString::Printf(TEXT("You have been killed."));
+	 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
+	 	}
+	 }
 
 	//服务器特定的功能
-	// if (GetLocalRole() == ROLE_Authority)
-	// {
-	// 	FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
-	// 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
-	// }
+	 if (GetLocalRole() == ROLE_Authority)
+	 {
+	 	FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
+	 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+	 }
 
 	//在所有机器上都执行的函数。 
 	/*
 		因任何因伤害或死亡而产生的特殊功能都应放在这里。
 	*/
+	if(CurrentHealth<=0)
+	{
+		CharacterDeath();
+		// OnDeath.Broadcast();
+	
+	}
+
 }
 
 void AFDEMOCharacter::OnRep_CurrentHealth()
@@ -220,6 +247,16 @@ void AFDEMOCharacter::SetCurrentHealth(float healthValue)
 
 void AFDEMOCharacter::StartFire()
 {
+StartFireServer();
+}
+
+void AFDEMOCharacter::StartFireServer_Implementation()
+{
+	StartFireMulticast();
+}
+
+void AFDEMOCharacter::StartFireMulticast_Implementation()
+{
 	if (!FireButtonDown&&GetCurrentHealth()>0)
 	{
 		FireButtonDown = true;
@@ -231,13 +268,26 @@ void AFDEMOCharacter::StartFire()
 
 
 		}
-		// HandleFire();
 	}
 }
+
 void AFDEMOCharacter::StopFire()
 {
-	FireButtonDown = false;
+	StopFireServer();
 }
+
+void AFDEMOCharacter::StopFireServer_Implementation()
+{
+	StopFireMulticast();
+}
+
+void AFDEMOCharacter::StopFireMulticast_Implementation()
+{
+	FireButtonDown = false;
+
+}
+
+
 
 void AFDEMOCharacter::HandleFire_Implementation()
 {
@@ -273,32 +323,124 @@ void AFDEMOCharacter::HandleFire_Implementation()
 	}
 	void AFDEMOCharacter::CharacterJump()
 	{
-		bPressedJump = true;
-		JumpKeyHoldTime = 0.0f;
-		JumpButtonDown=true;
+	CharacterJumpServer();	
 	}
-	void  AFDEMOCharacter::CharacterStopJumping ()
+
+void AFDEMOCharacter::CharacterJumpServer_Implementation()
+{
+	CharacterJumpMulticast();
+}
+
+void AFDEMOCharacter::CharacterJumpMulticast_Implementation()
+{
+	bPressedJump = true;
+	JumpKeyHoldTime = 0.0f;
+	JumpButtonDown=true;	
+}
+
+void  AFDEMOCharacter::CharacterStopJumping ()
 	{
-		bPressedJump = false;
-		JumpButtonDown=false;
-		ResetJumpState();
+	CharacterStopJumpingServer();
 	}
-	void AFDEMOCharacter::CharacterCrouching()
+
+void AFDEMOCharacter::CharacterStopJumpingServer_Implementation()
+{
+	CharacterStopJumpingMulticast();
+}
+
+void AFDEMOCharacter::CharacterStopJumpingMulticast_Implementation()
+{		bPressedJump = false;
+	JumpButtonDown=false;
+	ResetJumpState();
+}
+
+void AFDEMOCharacter::CharacterCrouching()
 	{
-		CrouchButtonDown=true;
+	CharacterCrouchingServer();
 	}
-	void AFDEMOCharacter::CharacterStopCrouching()
+
+void AFDEMOCharacter::CharacterCrouchingServer_Implementation()
+{
+	CharacterCrouchingMulticast();
+}
+
+void AFDEMOCharacter::CharacterCrouchingMulticast_Implementation()
+{
+	CrouchButtonDown=true;
+
+}
+
+void AFDEMOCharacter::CharacterStopCrouching()
 	{
-		CrouchButtonDown=false;
+	CharacterStopCrouchingServer();
 	}
-	void AFDEMOCharacter::CharacterPunching()
+
+void AFDEMOCharacter::CharacterStopCrouchingServer_Implementation()
+{
+	CharacterStopCrouchingMulticast();
+}
+
+void AFDEMOCharacter::CharacterStopCrouchingMulticast_Implementation()
+{
+	CrouchButtonDown=false;
+
+}
+
+void AFDEMOCharacter::CharacterPunching()
 	{
-		PunchButtonDown=true;
+	CharacterPunchingServer();
 	}
-	void AFDEMOCharacter::CharacterStopPunching()
+
+void AFDEMOCharacter::CharacterPunchingServer_Implementation()
+{
+	CharacterPunchingMulticast();
+}
+
+void AFDEMOCharacter::CharacterPunchingMulticast_Implementation()
+{
+	PunchButtonDown=true;
+}
+
+void AFDEMOCharacter::CharacterStopPunching()
 	{
-		PunchButtonDown=false;
+	CharacterStopPunchingServer();
 	}
+
+
+
+void AFDEMOCharacter::CharacterDeath()
+{
+	CharacterDeathServer();
+}
+
+void AFDEMOCharacter::CharacterDeathMulticast_Implementation()
+{
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
+	GetMesh()->SetAllBodiesPhysicsBlendWeight(1.0f);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}
+
+void AFDEMOCharacter::CharacterDeathServer_Implementation()
+{
+	CharacterDeathMulticast();
+}
+
+
+
+
+void AFDEMOCharacter::CharacterStopPunchingServer_Implementation()
+{
+	CharacterStopPunchingMulticast();
+}
+
+
+
+void AFDEMOCharacter::CharacterStopPunchingMulticast_Implementation()
+{
+	PunchButtonDown=false;
+}
+
+
 
 void AFDEMOCharacter::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const
 {
@@ -310,6 +452,39 @@ void AFDEMOCharacter::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutR
 	}
 	Super::GetActorEyesViewPoint(OutLocation, OutRotation);
 }
+
+bool AFDEMOCharacter::CanDie(float KillingDamage, FDamageEvent const& DamageEvent, AController* Killer,
+	AActor* DamageCauser) const
+{
+	if(bIsDying
+		||IsPendingKill()
+		||GetLocalRole()!=ROLE_Authority
+		||GetWorld()->GetAuthGameMode<AFDEMOGameMode>()==NULL
+		)
+	{
+		return  false;
+	}
+	return  true;
+}
+
+bool AFDEMOCharacter::Die(float KillingDamage, FDamageEvent const& DamageEvent, AController* Killer,
+                          AActor* DamageCauser)
+{
+	if(!CanDie(KillingDamage,DamageEvent,Killer,DamageCauser))
+	{
+		return  false;
+	}	
+	
+		CharacterDeath();
+	UDamageType const* const DamageType = DamageEvent.DamageTypeClass ? DamageEvent.DamageTypeClass->GetDefaultObject<UDamageType>() : GetDefault<UDamageType>();
+	Killer = GetDamageInstigator(Killer, *DamageType);
+	AController* const KilledPlayer = (Controller != NULL) ? Controller : Cast<AController>(GetOwner());
+		GetWorld()->GetAuthGameMode<AFDEMOGameMode>()->Killed(Killer,KilledPlayer,this,DamageType);
+		DeathDestroy();
+	GetWorld()->GetAuthGameMode<AFDEMOGameMode>()->StartMatch();
+	return true;
+}
+
 void AFDEMOCharacter::BeginZoom()
 {
 	bWantsToZoom = true;
@@ -320,12 +495,56 @@ void AFDEMOCharacter::EndZoom()
 	bWantsToZoom = false;
 }
 
+void AFDEMOCharacter::DeathDestroy()
+{
+	GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AFDEMOCharacter::OwnDestroy, 2.0f, false);	
+
+}
+
+void AFDEMOCharacter::OwnDestroy()
+{
+	
+	AMyPlayerController* tempController=Cast<AMyPlayerController>(Controller);
+	if(tempController!=nullptr)
+	{
+		tempController->UnPossess();
+		AFDEMOGameMode* tempMode=GetWorld()->GetAuthGameMode<AFDEMOGameMode>();
+		tempMode->RestartPlayer(tempController);
+		if(CurrentWeapon!=NULL)
+		CurrentWeapon->Destroy();
+		Destroy();
+	}
+
+}
+
 void AFDEMOCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	float TargetFOV = bWantsToZoom ? ZoomedFov : DefaultFOV;
 	float CurrentFOV = FMath::FInterpTo(FollowCamera->FieldOfView, TargetFOV, DeltaSeconds, ZoomInterSpeed);
 	FollowCamera->SetFieldOfView(CurrentFOV);
+}
+float AFDEMOCharacter::TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	AMyPlayerController* MyPC=Cast<AMyPlayerController>(Controller);
+	if(CurrentHealth<=0.f)
+	{
+		return  0.f;
+	}
+	AFDEMOGameMode* const Game=GetWorld()->GetAuthGameMode<AFDEMOGameMode>();
+	DamageTaken=Game?Game->ModifyDamage(DamageTaken,this
+		,DamageEvent,EventInstigator,DamageCauser):0.f;
+
+	const float ActualDamage=Super::TakeDamage(DamageTaken, DamageEvent, EventInstigator, DamageCauser);
+	if(ActualDamage>0.f)
+	{
+		CurrentHealth-=ActualDamage;
+		if(CurrentHealth<=0)
+		{
+			Die(ActualDamage, DamageEvent, EventInstigator, DamageCauser);	
+		}
+	}
+	return  ActualDamage;
 }
 
 

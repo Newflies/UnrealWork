@@ -35,6 +35,7 @@
     <content url="file://$MODULE_DIR$/../../../../UE4 Pubilc/UE_4.25/Engine/Plugins/Developer/PerforceSourceControl" />
     <content url="file://$MODULE_DIR$/../../../../UE4 Pubilc/UE_4.25/Engine/Plugins/Developer/PlasticSourceControl" />
     <content url="file://$MODULE_DIR$/../../../../UE4 Pubilc/UE_4.25/Engine/Plugins/Developer/RenderDocPlugin" />
+    <content url="file://$MODULE_DIR$/../../../../UE4 Pubilc/UE_4.25/Engine/Plugins/Developer/RiderLink" />
     <content url="file://$MODULE_DIR$/../../../../UE4 Pubilc/UE_4.25/Engine/Plugins/Developer/RiderSourceCodeAccess" />
     <content url="file://$MODULE_DIR$/../../../../UE4 Pubilc/UE_4.25/Engine/Plugins/Developer/SubversionSourceControl" />
     <content url="file://$MODULE_DIR$/../../../../UE4 Pubilc/UE_4.25/Engine/Plugins/Developer/TraceDataFiltering" />

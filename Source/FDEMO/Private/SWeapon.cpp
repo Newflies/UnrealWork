@@ -3,6 +3,7 @@
 
 #include "SWeapon.h"
 #include "DrawDebugHelpers.h"
+#include "PhysXInterfaceWrapperCore.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -22,7 +23,8 @@ ASWeapon::ASWeapon()
 	{
 		HeadSound=DefaultHeadSound.Object;
 	}
-	
+	DamageType=UDamageType::StaticClass();
+	Damage=10.0f;
 }
 
 // Called when the game starts or when spawned
@@ -38,6 +40,13 @@ void ASWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+void ASWeapon::OnUnEquip()
+{
+	MeshComp->DestroyComponent();
+	Destroy();
+}
+
 void ASWeapon::HandFire_Implementation() 
 {
 	
@@ -56,23 +65,21 @@ void ASWeapon::HandFire_Implementation()
 				QueryParams.AddIgnoredActor(MyOwner);
 				QueryParams.bTraceComplex=true;
 				FHitResult HitResult;
+				AController* Mycontroller= Cast<APawn>(GetOwner())->Controller;
 
 				if(GetWorld()->LineTraceSingleByChannel(HitResult,EyeLocation,TraceEnd,ECC_Camera,QueryParams))
 				{
 					if (HitResult.BoneName.ToString()!="None")
 					{
 						if(HitResult.BoneName.ToString()!="neck_01")
+						{
 							UGameplayStatics::PlaySound2D(GetWorld(),ShellSound);
+							UGameplayStatics::ApplyPointDamage(HitResult.GetActor(),Damage,GetActorLocation(),HitResult,Mycontroller,GetOwner(),DamageType);
+						}
 						else
 						{
 							UGameplayStatics::PlaySound2D(GetWorld(),HeadSound);
-							GEngine->AddOnScreenDebugMessage
-                            (
-                            -1,
-                                10, 			//	显示的时间/秒
-                                FColor::Blue, 	//	显示的颜色
-                                HitResult.BoneName.ToString()	//	显示的信息
-                            );
+							UGameplayStatics::ApplyPointDamage(HitResult.GetActor(),2*Damage,GetActorLocation(),HitResult,Mycontroller,GetOwner(),DamageType);
 						}
 					}
 
