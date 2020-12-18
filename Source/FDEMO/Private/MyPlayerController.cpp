@@ -3,7 +3,6 @@
 
 #include "MyPlayerController.h"
 
-#include "AssetTypeCategories.h"
 #include "FDEMO/FDEMOCharacter.h"
 #include "FDEMO/FDEMOGameMode.h"
 #include "GameFramework/PlayerStart.h"

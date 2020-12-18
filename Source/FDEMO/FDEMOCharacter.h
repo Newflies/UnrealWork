@@ -44,7 +44,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=Weapon)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Weapon)
 	ASWeapon* CurrentWeapon;
 	
 	UPROPERTY(EditDefaultsOnly,Category="Player")

@@ -14,7 +14,7 @@ class AFDEMOGameMode : public AGameModeBase
 
 public:
 	// float Timer;
-	
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	bool IsStart;
 	
 	AFDEMOGameMode();

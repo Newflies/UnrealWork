@@ -63,12 +63,12 @@ AFDEMOCharacter::AFDEMOCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 	//初始化玩家生命值
-	MaxHealth = 10.0f;
+	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
 	//初始化投射物类
 	ProjectileClass = AThirdPersonMPProjectile::StaticClass();
 	//初始化射速
-	FireRate = 2.0f;
+	FireRate = 0.25f;
 	FireButtonDown = false;
 	//玩家分数
 	PlayerScore = 0;
@@ -511,7 +511,7 @@ void AFDEMOCharacter::OwnDestroy()
 		AFDEMOGameMode* tempMode=GetWorld()->GetAuthGameMode<AFDEMOGameMode>();
 		tempMode->RestartPlayer(tempController);
 		if(CurrentWeapon!=NULL)
-		CurrentWeapon->Destroy();
+		CurrentWeapon->SetActorHiddenInGame(true);
 		Destroy();
 	}
 

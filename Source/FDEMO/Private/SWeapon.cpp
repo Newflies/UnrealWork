@@ -59,7 +59,7 @@ void ASWeapon::HandFire_Implementation()
 
 			if(!ProjectileClass)
 			{
-				FVector TraceEnd=EyeLocation+(EyeRotation.Vector()*1000);
+				FVector TraceEnd=EyeLocation+(EyeRotation.Vector()*10000);
 				FCollisionQueryParams QueryParams;
 				QueryParams.AddIgnoredActor(this);
 				QueryParams.AddIgnoredActor(MyOwner);
