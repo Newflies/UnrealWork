@@ -24,3 +24,9 @@
 链接：https://pan.baidu.com/s/1cmP21pK5p1_qQjEQObzEzA 
 提取码：2rrq 
 复制这段内容后打开百度网盘手机App，操作更方便哦
+
+第六次作业
+添加功能：添加枪口火焰，游戏大厅的创建与加入，计分板，动画与子弹的网络同步，人物的重生，人物的死亡表现
+链接：https://pan.baidu.com/s/1EwOEZYPc-jHSqivcblPEGQ 
+提取码：8ygd 
+复制这段内容后打开百度网盘手机App，操作更方便哦
