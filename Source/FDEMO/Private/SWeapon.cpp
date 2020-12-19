@@ -4,6 +4,7 @@
 #include "SWeapon.h"
 #include "DrawDebugHelpers.h"
 #include "PhysXInterfaceWrapperCore.h"
+#include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -13,6 +14,8 @@ ASWeapon::ASWeapon()
 	PrimaryActorTick.bCanEverTick = true;
 	MeshComp=CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
 	RootComponent=MeshComp;
+	MuzzleCamera=CreateDefaultSubobject<UCameraComponent>(TEXT("MuzzleCamera"));
+	MuzzleCamera->SetupAttachment(RootComponent,"Muzzle");
 	static ConstructorHelpers::FObjectFinder<USoundBase> DefaultSound(TEXT("/Game/HumanVocalizations/HumanMaleA/Cues/voice_male_grunt_pain_01_Cue.voice_male_grunt_pain_01_Cue"));
 	if(DefaultSound.Succeeded())
 	{

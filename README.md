@@ -36,3 +36,5 @@
 链接：https://pan.baidu.com/s/1lr3Pu3-Ma3_Nu8BJJGnxpw 
 提取码：kx9x 
 复制这段内容后打开百度网盘手机App，操作更方便哦
+
+额外添加功能：受伤特效显示，右键机瞄（视频未演示）

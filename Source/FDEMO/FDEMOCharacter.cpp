@@ -487,12 +487,12 @@ bool AFDEMOCharacter::Die(float KillingDamage, FDamageEvent const& DamageEvent, 
 
 void AFDEMOCharacter::BeginZoom()
 {
-	bWantsToZoom = true;
+
 }
 
 void AFDEMOCharacter::EndZoom()
 {
-	bWantsToZoom = false;
+
 }
 
 void AFDEMOCharacter::DeathDestroy()

@@ -10,10 +10,12 @@ UCLASS()
 class FDEMO_API ASWeapon : public AActor
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Components")
 	class USkeletalMeshComponent* MeshComp;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="camera")
+	class UCameraComponent* MuzzleCamera;
 	// Sets default values for this actor's properties
 	ASWeapon();
 
